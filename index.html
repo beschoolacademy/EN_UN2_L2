@@ -1,0 +1,1650 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>be;school | Unit 2 Lesson 2-2: Network Security Design</title>
+  <!-- Google Fonts: Cairo (400 to 900) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Font Awesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              orange: '#FF5500',
+              'orange-dark': '#E04A00',
+              'orange-light': '#FFF4ED',
+              navy: '#0B1B48',
+              'navy-light': '#14285D',
+              'navy-dark': '#07112E',
+            }
+          },
+          fontFamily: {
+            cairo: ['Cairo', 'sans-serif'],
+          },
+          boxShadow: {
+            'soft': '0 4px 20px -2px rgba(11, 27, 72, 0.07)',
+            'elevated': '0 12px 35px -4px rgba(11, 27, 72, 0.12)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background-color: #F8FAFC;
+      color: #0B1B48;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+    .brand-logo-text {
+      direction: ltr !important;
+      unicode-bidi: isolate;
+      display: inline-flex;
+      align-items: baseline;
+      font-family: 'Cairo', sans-serif;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+    }
+    .brand-logo-orange { color: #FF5500; }
+    .brand-logo-navy { color: #0B1B48; }
+    .brand-subtext {
+      color: #0B1B48;
+      font-weight: 800;
+      font-size: 0.85rem;
+      margin-top: -4px;
+      text-align: center;
+    }
+    .flip-card {
+      perspective: 1000px;
+      height: 280px;
+    }
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: left;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+      cursor: pointer;
+    }
+    .flip-card.flipped .flip-card-inner {
+      transform: rotateY(180deg);
+    }
+    .flip-card-front, .flip-card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      border-radius: 1.25rem;
+    }
+    .flip-card-back { transform: rotateY(180deg); }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #F1F5F9; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #FF5500; }
+    @media print {
+      body * { visibility: hidden; }
+      #print-area, #print-area * { visibility: visible; }
+      #print-area { position: absolute; left: 0; top: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col" dir="ltr">
+
+  <!-- Landing Screen -->
+  <section id="screen-landing" class="min-h-screen flex flex-col justify-between transition-all duration-500">
+    <div class="bg-[#0d1527] text-slate-300 px-4 py-2.5 flex items-center justify-between text-xs border-b border-slate-800">
+      <div class="flex items-center gap-2">
+        <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span class="font-medium text-slate-300">be;school Interactive Revision Suite • 2026/2027</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="bg-brand-navy-light/70 px-2.5 py-0.5 rounded text-[11px] text-orange-400 font-bold">2nd Secondary Grade • Cybersecurity Unit</span>
+        <button onclick="showToast('Official Ministry Curriculum: Egyptian Baccalaureate Edition')" class="hover:text-white transition">
+          <i class="fa-solid fa-circle-info"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto w-full px-4 py-8 md:py-12 flex-1 flex flex-col justify-center items-center">
+      <div class="text-center mb-8">
+        <div class="inline-flex flex-col items-center justify-center p-4 bg-white rounded-2xl shadow-soft border border-slate-100 mb-4">
+          <div class="brand-logo-text text-4xl sm:text-5xl font-black" dir="ltr">
+            <span class="brand-logo-orange">be</span><span class="brand-logo-orange">;</span><span class="brand-logo-navy">school</span>
+          </div>
+          <div class="brand-subtext text-brand-navy mt-1">مدرسة البرمجة</div>
+        </div>
+        <h1 class="text-2xl sm:text-3xl md:text-4xl font-black text-brand-navy mt-2">
+          Interactive Revision Platform
+        </h1>
+        <p class="text-slate-500 font-medium text-sm sm:text-base mt-2 max-w-xl mx-auto">
+          Programming and Artificial Intelligence • High School Year 2 (Languages & Egyptian Baccalaureate Edition)
+        </p>
+      </div>
+
+      <div class="w-full bg-white rounded-3xl p-6 sm:p-10 shadow-elevated border border-slate-100 text-center relative overflow-hidden transition-transform duration-300 hover:scale-[1.01]">
+        <div class="absolute top-0 right-0 w-36 h-36 bg-brand-orange-light rounded-bl-full -z-0 opacity-60"></div>
+        <div class="relative z-10 flex flex-col items-center">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-orange-light text-brand-orange font-bold text-xs sm:text-sm mb-4">
+            <i class="fa-solid fa-shield-halved text-sm"></i>
+            Unit 2: Cybersecurity • Lesson 2-2
+          </div>
+          <h2 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-brand-navy mb-4 leading-snug">
+            Network Security Design
+          </h2>
+          <p class="text-slate-600 text-sm sm:text-base max-w-2xl mx-auto mb-8 leading-relaxed">
+            Master firewalls, VPNs, DMZs, defense in depth, and zero trust architecture with complete textbook tables, interactive network simulations, and rigorous evaluations.
+          </p>
+          <button onclick="goToNameEntry()" class="w-full sm:w-auto px-10 py-4 bg-brand-orange hover:bg-brand-orange-dark text-white text-lg font-bold rounded-2xl shadow-lg shadow-orange-500/30 transition duration-200 transform hover:-translate-y-1 flex items-center justify-center gap-3">
+            <span>Start Revision 🎯</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-8 bg-blue-50/70 border border-blue-100 rounded-2xl p-4 sm:p-5 text-center max-w-xl text-xs sm:text-sm text-slate-600 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center flex-shrink-0">
+          <i class="fa-solid fa-chalkboard-user text-lg"></i>
+        </div>
+        <p class="text-left leading-relaxed">
+          <strong>Instructional Note:</strong> Enter your name below to track your interactive learning progress and generate your verified assessment card.
+        </p>
+      </div>
+    </div>
+
+    <footer class="text-center py-4 text-xs text-slate-400 border-t border-slate-200 bg-white">
+      © 2026/2027 Ministry of Education & Technical Education in collaboration with Japanese Partners | be;school
+    </footer>
+  </section>
+
+  <!-- Student Name Entry Screen -->
+  <section id="screen-name-entry" class="min-h-screen flex flex-col justify-center items-center px-4 py-8 hidden transition-all duration-500">
+    <div class="max-w-md w-full bg-white rounded-3xl p-6 sm:p-8 shadow-elevated border border-slate-100 relative">
+      <button onclick="goToLanding()" class="absolute top-6 left-6 text-slate-400 hover:text-brand-navy text-sm font-semibold flex items-center gap-1.5 transition">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>Back</span>
+      </button>
+
+      <div class="w-20 h-20 bg-brand-orange-light text-brand-orange rounded-3xl mx-auto flex items-center justify-center text-3xl mb-5 shadow-inner">
+        <i class="fa-solid fa-user-graduate"></i>
+      </div>
+
+      <div class="text-center mb-6">
+        <h3 class="text-xl font-black text-brand-navy">Enter Your Name to Continue</h3>
+        <p class="text-xs text-slate-500 mt-1 font-medium">Unlock the full interactive revision suite and 50-question exam</p>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label for="student-name-input" class="block text-xs font-bold text-slate-700 mb-1.5">
+            Student Full Name or Identifier <span class="text-brand-orange">*</span>
+          </label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+              <i class="fa-regular fa-id-badge"></i>
+            </span>
+            <input 
+              type="text" 
+              id="student-name-input" 
+              placeholder="Enter your name here..." 
+              class="w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-orange/40 focus:border-brand-orange text-brand-navy font-bold transition"
+              onkeypress="handleNameKeypress(event)"
+            />
+          </div>
+          <p id="name-error" class="text-red-500 text-xs mt-1.5 font-bold hidden flex items-center gap-1">
+            <i class="fa-solid fa-circle-exclamation"></i> Please enter your name first to proceed!
+          </p>
+        </div>
+
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-[11px] text-slate-500 leading-relaxed">
+          <i class="fa-solid fa-shield-halved text-brand-orange mr-1"></i>
+          Your session progress is tracked locally for your verified 50-question performance certificate.
+        </div>
+
+        <button onclick="submitStudentName()" class="w-full py-3.5 bg-brand-orange hover:bg-brand-orange-dark text-white font-bold rounded-xl shadow-md transition duration-150 flex items-center justify-center gap-2">
+          <span>Enter Platform & Start 🚀</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Learning Platform -->
+  <section id="screen-main-platform" class="min-h-screen flex flex-col hidden transition-all duration-500">
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur shadow-sm border-b border-slate-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="brand-logo-text text-2xl font-black" dir="ltr">
+            <span class="brand-logo-orange">be</span><span class="brand-logo-orange">;</span><span class="brand-logo-navy">school</span>
+          </div>
+          <span class="hidden sm:inline-block h-5 w-px bg-slate-200"></span>
+          <span class="hidden md:inline-block text-xs font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">
+            Unit 2 • Lesson 2-2: Network Security Design
+          </span>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-3">
+          <div class="flex items-center gap-1.5 bg-brand-orange-light text-brand-orange px-3 py-1.5 rounded-full text-xs font-bold border border-orange-200">
+            <i class="fa-solid fa-user-check"></i>
+            <span id="header-student-name">Student</span>
+          </div>
+          <button onclick="triggerPrintModal()" title="Print Exam-Eve Summary" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition text-sm">
+            <i class="fa-solid fa-print"></i>
+          </button>
+          <button onclick="logoutToLanding()" title="Return to Landing" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 transition text-sm">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-brand-navy text-white px-4">
+        <div class="max-w-7xl mx-auto flex overflow-x-auto no-scrollbar gap-1 py-1.5">
+          <button onclick="switchTab('tab-explanation')" id="nav-btn-explanation" class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 whitespace-nowrap transition bg-brand-orange text-white">
+            <i class="fa-solid fa-book-open-reader"></i>
+            <span>1. Explanation & Textbook Tables</span>
+          </button>
+          <button onclick="switchTab('tab-revision')" id="nav-btn-revision" class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 whitespace-nowrap transition text-slate-300 hover:bg-brand-navy-light">
+            <i class="fa-solid fa-layer-group"></i>
+            <span>2. Revision & Audio Summary</span>
+          </button>
+          <button onclick="switchTab('tab-solutions')" id="nav-btn-solutions" class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 whitespace-nowrap transition text-slate-300 hover:bg-brand-navy-light">
+            <i class="fa-solid fa-square-check"></i>
+            <span>3. Textbook Solutions (p. 41-48)</span>
+          </button>
+          <button onclick="switchTab('tab-exam')" id="nav-btn-exam" class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 whitespace-nowrap transition text-slate-300 hover:bg-brand-navy-light">
+            <i class="fa-solid fa-vial-circle-check"></i>
+            <span>4. Exam (50 Questions)</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto w-full px-4 sm:px-6 py-8 flex-1">
+
+      <!-- TAB 1: Explanation & Textbook Tables & Interactive Simulations -->
+      <div id="tab-explanation" class="tab-pane space-y-10">
+        
+        <!-- Objectives & Guiding Question -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-soft border border-slate-200">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4 mb-6">
+            <div class="flex items-center gap-2 text-brand-orange font-black text-sm">
+              <i class="fa-solid fa-bullseye text-base"></i>
+              <span>Official Learning Objectives (Textbook p. 41)</span>
+            </div>
+            <span class="text-xs bg-slate-100 px-3 py-1 rounded-full font-bold text-slate-600">Curriculum 2026/2027</span>
+          </div>
+          <ul class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <li class="flex items-start gap-3 bg-brand-orange-light/50 p-4 rounded-2xl border border-orange-100">
+              <i class="fa-solid fa-check-circle text-brand-orange mt-1"></i>
+              <div class="text-sm font-bold text-slate-700 leading-relaxed">
+                Explain the roles of firewalls, VPNs, and DMZs in protecting an organization's network from unauthorized external and internal threats.
+              </div>
+            </li>
+            <li class="flex items-start gap-3 bg-brand-orange-light/50 p-4 rounded-2xl border border-orange-100">
+              <i class="fa-solid fa-check-circle text-brand-orange mt-1"></i>
+              <div class="text-sm font-bold text-slate-700 leading-relaxed">
+                Describe defense in depth and zero trust, and explain why layered, verified access is significantly stronger than a single perimeter barrier.
+              </div>
+            </li>
+          </ul>
+
+          <div class="bg-gradient-to-r from-brand-navy to-brand-navy-light text-white p-5 rounded-2xl flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-brand-orange flex items-center justify-center text-xl flex-shrink-0">
+              <i class="fa-solid fa-question"></i>
+            </div>
+            <div>
+              <span class="text-xs font-bold text-orange-300 block mb-1">Guiding Question:</span>
+              <p class="text-sm sm:text-base font-bold leading-relaxed">
+                How can an organization design its network so that, even if one defense is breached, the system stays protected?
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 1: Core Technologies (Firewall, VPN, DMZ) & Textbook Table -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-soft border border-slate-200 space-y-6">
+          <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
+            <span class="w-10 h-10 rounded-2xl bg-brand-orange text-white flex items-center justify-center font-black"><i class="fa-solid fa-network-wired"></i></span>
+            <div>
+              <h3 class="text-xl font-black text-brand-navy">1. Core Network Security Barriers (Textbook p. 42-43)</h3>
+              <p class="text-xs text-slate-500 font-medium">Firewalls, Virtual Private Networks (VPN), and Demilitarized Zones (DMZ)</p>
+            </div>
+          </div>
+
+          <div class="text-sm text-slate-700 leading-relaxed space-y-4">
+            <p>
+              An organization's network holds highly confidential data—customer records, financial files, and internal communications. Attackers constantly look for a way in. A single lock on the front door is never enough because if it is picked, everything inside is exposed. Modern network security relies on multiple barriers and verified zones.
+            </p>
+            <div class="p-4 rounded-2xl bg-brand-orange-light border border-orange-200 text-brand-navy font-bold text-xs sm:text-sm">
+              <i class="fa-solid fa-shield-halved text-brand-orange mr-2"></i>
+              <strong>Key Fact:</strong> Strong network security comes from layering measures—firewall, VPN, DMZ, endpoint protection—and from verifying every access (zero trust), never relying on a single barrier.
+            </div>
+          </div>
+
+          <!-- SIMULATION: Interactive Network Defense Sandbox -->
+          <div class="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 border border-slate-800 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-brand-orange/20 rounded-bl-full -z-0 blur-xl"></div>
+            <div class="relative z-10">
+              <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+                <div class="flex items-center gap-3">
+                  <span class="w-10 h-10 rounded-2xl bg-brand-orange text-white flex items-center justify-center font-black"><i class="fa-solid fa-shield"></i></span>
+                  <div>
+                    <h4 class="text-base sm:text-lg font-black">Interactive Network Security Component Simulator</h4>
+                    <p class="text-xs text-slate-400">Click each core measure below to inspect its operational role and defense mechanism</p>
+                  </div>
+                </div>
+                <span class="text-xs bg-brand-orange text-white font-bold px-3 py-1 rounded-full">Live Network Lab</span>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+                <button onclick="setNetSimComponent('firewall')" id="net-btn-firewall" class="p-3.5 rounded-xl text-left border-2 transition bg-brand-orange text-white border-brand-orange shadow">
+                  <span class="text-[10px] font-black uppercase opacity-80 block mb-1">Barrier 1</span>
+                  <h5 class="font-bold text-xs sm:text-sm">Firewall</h5>
+                </button>
+                <button onclick="setNetSimComponent('vpn')" id="net-btn-vpn" class="p-3.5 rounded-xl text-left border-2 transition bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700">
+                  <span class="text-[10px] font-black uppercase opacity-80 block mb-1">Barrier 2</span>
+                  <h5 class="font-bold text-xs sm:text-sm">VPN (Virtual Private Network)</h5>
+                </button>
+                <button onclick="setNetSimComponent('dmz')" id="net-btn-dmz" class="p-3.5 rounded-xl text-left border-2 transition bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700">
+                  <span class="text-[10px] font-black uppercase opacity-80 block mb-1">Barrier 3</span>
+                  <h5 class="font-bold text-xs sm:text-sm">DMZ (Demilitarized Zone)</h5>
+                </button>
+              </div>
+
+              <div id="net-sim-output" class="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs sm:text-sm leading-relaxed">
+                <strong class="text-orange-400 text-sm block mb-2 font-black">Firewall (Textbook p. 42)</strong>
+                <p class="mb-2 text-slate-300">Installed at the entry/exit point of a network. It allows or denies communication based on rules set in advance (e.g., allow public web traffic, block direct external access to internal databases).</p>
+                <div class="mt-2 pt-2 border-t border-slate-800 text-[11px] text-orange-300 font-mono">
+                  <strong>Role:</strong> Perimeter traffic filtration and rule-based packet blocking.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Defense in Depth & Textbook Table (p. 43-44) -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-soft border border-slate-200 space-y-6">
+          <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
+            <span class="w-10 h-10 rounded-2xl bg-brand-navy text-white flex items-center justify-center font-black"><i class="fa-solid fa-layer-group"></i></span>
+            <div>
+              <h3 class="text-xl font-black text-brand-navy">2. Defense in Depth & Textbook Layers Table (p. 43-44)</h3>
+              <p class="text-xs text-slate-500 font-medium">Layering multiple security measures so that if one fails, the next holds</p>
+            </div>
+          </div>
+
+          <p class="text-sm text-slate-700 leading-relaxed">
+            <strong>Defense in depth</strong> is the concept of layering multiple security measures so that even if one measure is breached, the subsequent layer can still protect the system. Organizations combine measures across four distinct network layers:
+          </p>
+
+          <!-- Official Textbook Table: Defense in Depth Layers -->
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+              <thead>
+                <tr class="bg-brand-navy text-white">
+                  <th class="p-3.5 rounded-tl-xl font-bold">Layer</th>
+                  <th class="p-3.5 rounded-tr-xl font-bold">Examples of Measures</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 bg-slate-50/50">
+                <tr class="hover:bg-slate-50 transition">
+                  <td class="p-3.5 font-bold text-brand-orange">Layer 1: Network entry</td>
+                  <td class="p-3.5 text-slate-700">Block unauthorized communication using a <strong>firewall</strong>.</td>
+                </tr>
+                <tr class="hover:bg-slate-50 transition">
+                  <td class="p-3.5 font-bold text-brand-orange">Layer 2: Communication path</td>
+                  <td class="p-3.5 text-slate-700">Encrypt communication using a <strong>VPN</strong>.</td>
+                </tr>
+                <tr class="hover:bg-slate-50 transition">
+                  <td class="p-3.5 font-bold text-brand-orange">Layer 3: Server placement</td>
+                  <td class="p-3.5 text-slate-700">Separate public-facing servers from the internal network using a <strong>DMZ</strong>.</td>
+                </tr>
+                <tr class="hover:bg-slate-50 transition">
+                  <td class="p-3.5 font-bold text-brand-orange">Layer 4: Endpoints</td>
+                  <td class="p-3.5 text-slate-700">Install antivirus software and keep the operating system updated on user PCs.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Section 3: Zero Trust vs. Traditional Perimeter Security (p. 44-45) -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-soft border border-slate-200 space-y-6">
+          <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
+            <span class="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-black"><i class="fa-solid fa-user-shield"></i></span>
+            <div>
+              <h3 class="text-xl font-black text-brand-navy">3. The Concept of Zero Trust (Textbook p. 44-45)</h3>
+              <p class="text-xs text-slate-500 font-medium">Moving beyond the outdated perimeter model where "inside is safe, outside is dangerous"</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs sm:text-sm text-slate-700 leading-relaxed">
+            <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+              <strong class="text-brand-navy text-sm font-black block">Traditional Perimeter Security</strong>
+              <p>Based on the premise that "inside the organization's network is safe, and outside is dangerous." Protected only at the outer border.</p>
+              <div class="p-3 bg-red-50 text-red-800 rounded-xl font-bold text-xs">
+                <i class="fa-solid fa-triangle-exclamation mr-1"></i> Vulnerability: Once an attacker bypasses the perimeter firewall, everything inside is trusted automatically.
+              </div>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-3">
+              <strong class="text-emerald-900 text-sm font-black block">Zero Trust Architecture</strong>
+              <p>A security concept stating that the system <strong>does not trust any communication</strong>, including from within the organization's network, and always verifies it.</p>
+              <div class="p-3 bg-white text-emerald-900 rounded-xl font-bold text-xs border border-emerald-200">
+                <i class="fa-solid fa-check-circle mr-1 text-emerald-600"></i> Benefit: Identity verification and access permission checks are performed on every single request, regardless of origin.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Think It Through Breakouts -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-soft border border-slate-200">
+          <div class="flex items-center gap-3 mb-6">
+            <span class="w-9 h-9 rounded-xl bg-brand-navy text-white flex items-center justify-center text-sm font-black"><i class="fa-solid fa-lightbulb"></i></span>
+            <h3 class="text-xl font-black text-brand-navy">Think It Through & Case Study Breakouts</h3>
+          </div>
+
+          <div class="space-y-6">
+            <div class="p-5 bg-orange-50/70 border border-orange-200 rounded-2xl">
+              <div class="flex items-center justify-between gap-3 mb-2">
+                <span class="text-xs font-black text-brand-orange uppercase tracking-wider">DMZ Isolation (Textbook p. 44)</span>
+                <button onclick="toggleAnswer('think-dmz')" class="text-xs font-bold text-brand-orange bg-white px-3 py-1.5 rounded-lg border border-orange-300 hover:bg-orange-100 transition">
+                  Reveal Model Answer
+                </button>
+              </div>
+              <p class="text-xs sm:text-sm font-bold text-brand-navy mb-2">
+                Why is it safer to place a public web server in a DMZ rather than inside the internal network?
+              </p>
+              <div id="think-dmz" class="hidden mt-3 p-4 bg-white rounded-xl border border-slate-200 text-xs sm:text-sm text-slate-700 leading-relaxed">
+                <strong>Curriculum Answer:</strong> Because a web server must be exposed to external users on the Internet, it is a prime target for attacks. Placing it in a DMZ isolates it between two firewalls. If hackers breach the web server, the internal network containing confidential databases remains safely blocked off.
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- TAB 2: Revision & Audio Summary -->
+      <div id="tab-revision" class="tab-pane hidden space-y-10">
+        
+        <div class="bg-gradient-to-r from-brand-navy via-brand-navy-light to-brand-navy text-white rounded-3xl p-6 sm:p-8 shadow-elevated border border-slate-700 relative overflow-hidden">
+          <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-brand-orange/20 rounded-full blur-2xl"></div>
+          
+          <div class="relative z-10">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-brand-orange flex items-center justify-center text-xl text-white shadow-lg">
+                  <i class="fa-solid fa-headphones"></i>
+                </div>
+                <div>
+                  <h3 class="text-lg sm:text-xl font-black">60-Second Audio Rapid Summary</h3>
+                  <p class="text-xs text-orange-200 font-medium">Native English Speech Synthesis • 1.15x Educational Cadence</p>
+                </div>
+              </div>
+              
+              <div class="flex items-center gap-2">
+                <button id="audio-play-btn" onclick="playAudioSummary()" class="px-5 py-2.5 bg-brand-orange hover:bg-brand-orange-dark text-white rounded-xl text-xs sm:text-sm font-bold shadow transition flex items-center gap-2">
+                  <i class="fa-solid fa-play"></i>
+                  <span>Listen to Summary 🎙️</span>
+                </button>
+                <button onclick="pauseAudioSummary()" class="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition">
+                  <i class="fa-solid fa-pause"></i>
+                </button>
+                <button onclick="stopAudioSummary()" class="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition">
+                  <i class="fa-solid fa-stop"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="bg-slate-900/80 backdrop-blur rounded-2xl p-4 text-xs sm:text-sm text-slate-300 leading-relaxed border border-slate-700/60 max-h-36 overflow-y-auto">
+              <p id="audio-script-text">
+                Welcome students to Be School! Here is your quick revision of Lesson 2-2: Network Security Design. Strong network security relies on layering multiple defenses. A firewall allows or denies communication at entry and exit points. A VPN creates an encrypted virtual private tunnel over the internet for remote work. A DMZ separates public-facing servers from internal data. Defense in depth combines network entry, communication paths, server placement, and endpoint controls. Finally, zero trust ensures that no communication is trusted automatically and every single access is verified.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3D Flip Flashcards Section (6 Core Concepts) -->
+        <div>
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-xl bg-brand-orange text-white flex items-center justify-center text-sm font-bold">
+                <i class="fa-solid fa-clone"></i>
+              </span>
+              <h3 class="text-xl font-black text-brand-navy">3D Concept Flashcards</h3>
+            </div>
+            <span class="text-xs text-slate-500 font-bold">Click any card to flip and inspect its definition</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+              <div class="flip-card-inner">
+                <div class="flip-card-front bg-white p-6 shadow-soft border-2 border-slate-100 flex flex-col justify-between hover:border-brand-orange transition">
+                  <div class="flex items-center justify-between"><span class="text-xs font-bold text-brand-orange bg-brand-orange-light px-2.5 py-1 rounded-lg">Network Security</span><i class="fa-solid fa-arrow-rotate-right text-slate-400 text-sm"></i></div>
+                  <div class="text-center my-auto">
+                    <div class="w-14 h-14 rounded-2xl bg-orange-100 text-brand-orange mx-auto flex items-center justify-center text-2xl mb-3"><i class="fa-solid fa-shield-cat"></i></div>
+                    <h4 class="text-lg font-black text-brand-navy">Firewall</h4>
+                  </div>
+                  <span class="text-[11px] text-center text-slate-400 font-bold">Click to flip</span>
+                </div>
+                <div class="flip-card-back bg-gradient-to-br from-brand-navy to-brand-navy-light text-white p-6 shadow-elevated flex flex-col justify-between">
+                  <span class="text-xs font-bold text-orange-400">Definition:</span>
+                  <p class="text-xs sm:text-sm font-medium leading-relaxed my-auto text-slate-200">A system installed at a network's entry/exit point that allows or denies communication based on preset rules.</p>
+                  <span class="text-[10px] text-slate-400">Textbook p. 42</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+              <div class="flip-card-inner">
+                <div class="flip-card-front bg-white p-6 shadow-soft border-2 border-slate-100 flex flex-col justify-between hover:border-brand-orange transition">
+                  <div class="flex items-center justify-between"><span class="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg">Tunneling</span><i class="fa-solid fa-arrow-rotate-right text-slate-400 text-sm"></i></div>
+                  <div class="text-center my-auto">
+                    <div class="w-14 h-14 rounded-2xl bg-blue-100 text-blue-600 mx-auto flex items-center justify-center text-2xl mb-3"><i class="fa-solid fa-tunnel"></i></div>
+                    <h4 class="text-lg font-black text-brand-navy">VPN</h4>
+                  </div>
+                  <span class="text-[11px] text-center text-slate-400 font-bold">Click to flip</span>
+                </div>
+                <div class="flip-card-back bg-gradient-to-br from-blue-950 to-brand-navy text-white p-6 shadow-elevated flex flex-col justify-between">
+                  <span class="text-xs font-bold text-blue-400">Definition:</span>
+                  <p class="text-xs sm:text-sm font-medium leading-relaxed my-auto text-slate-200">Virtual Private Network: creates an encrypted virtual private tunnel over the Internet for safe remote connections.</p>
+                  <span class="text-[10px] text-slate-400">Textbook p. 42</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+              <div class="flip-card-inner">
+                <div class="flip-card-front bg-white p-6 shadow-soft border-2 border-slate-100 flex flex-col justify-between hover:border-brand-orange transition">
+                  <div class="flex items-center justify-between"><span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg">Isolation</span><i class="fa-solid fa-arrow-rotate-right text-slate-400 text-sm"></i></div>
+                  <div class="text-center my-auto">
+                    <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center text-2xl mb-3"><i class="fa-solid fa-server"></i></div>
+                    <h4 class="text-lg font-black text-brand-navy">DMZ</h4>
+                  </div>
+                  <span class="text-[11px] text-center text-slate-400 font-bold">Click to flip</span>
+                </div>
+                <div class="flip-card-back bg-gradient-to-br from-emerald-950 to-brand-navy text-white p-6 shadow-elevated flex flex-col justify-between">
+                  <span class="text-xs font-bold text-emerald-400">Definition:</span>
+                  <p class="text-xs sm:text-sm font-medium leading-relaxed my-auto text-slate-200">Demilitarized Zone: an area where public-facing servers are placed separately from the internal network.</p>
+                  <span class="text-[10px] text-slate-400">Textbook p. 42</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+              <div class="flip-card-inner">
+                <div class="flip-card-front bg-white p-6 shadow-soft border-2 border-slate-100 flex flex-col justify-between hover:border-brand-orange transition">
+                  <div class="flex items-center justify-between"><span class="text-xs font-bold text-purple-600 bg-purple-50 px-2.5 py-1 rounded-lg">Strategy</span><i class="fa-solid fa-arrow-rotate-right text-slate-400 text-sm"></i></div>
+                  <div class="text-center my-auto">
+                    <div class="w-14 h-14 rounded-2xl bg-purple-100 text-purple-600 mx-auto flex items-center justify-center text-2xl mb-3"><i class="fa-solid fa-layer-group"></i></div>
+                    <h4 class="text-lg font-black text-brand-navy">Defense in Depth</h4>
+                  </div>
+                  <span class="text-[11px] text-center text-slate-400 font-bold">Click to flip</span>
+                </div>
+                <div class="flip-card-back bg-gradient-to-br from-purple-950 to-brand-navy text-white p-6 shadow-elevated flex flex-col justify-between">
+                  <span class="text-xs font-bold text-purple-400">Definition:</span>
+                  <p class="text-xs sm:text-sm font-medium leading-relaxed my-auto text-slate-200">Layering multiple security measures so that if one is breached, the next can still protect the system.</p>
+                  <span class="text-[10px] text-slate-400">Textbook p. 43</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+              <div class="flip-card-inner">
+                <div class="flip-card-front bg-white p-6 shadow-soft border-2 border-slate-100 flex flex-col justify-between hover:border-brand-orange transition">
+                  <div class="flex items-center justify-between"><span class="text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-lg">Trust Model</span><i class="fa-solid fa-arrow-rotate-right text-slate-400 text-sm"></i></div>
+                  <div class="text-center my-auto">
+                    <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-600 mx-auto flex items-center justify-center text-2xl mb-3"><i class="fa-solid fa-user-lock"></i></div>
+                    <h4 class="text-lg font-black text-brand-navy">Zero Trust</h4>
+                  </div>
+                  <span class="text-[11px] text-center text-slate-400 font-bold">Click to flip</span>
+                </div>
+                <div class="flip-card-back bg-gradient-to-br from-amber-950 to-brand-navy text-white p-6 shadow-elevated flex flex-col justify-between">
+                  <span class="text-xs font-bold text-amber-400">Definition:</span>
+                  <p class="text-xs sm:text-sm font-medium leading-relaxed my-auto text-slate-200">A security concept meaning the system trusts no communication—even internal—and always verifies every request.</p>
+                  <span class="text-[10px] text-slate-400">Textbook p. 43, 44</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+              <div class="flip-card-inner">
+                <div class="flip-card-front bg-white p-6 shadow-soft border-2 border-slate-100 flex flex-col justify-between hover:border-brand-orange transition">
+                  <div class="flex items-center justify-between"><span class="text-xs font-bold text-teal-600 bg-teal-50 px-2.5 py-1 rounded-lg">Boundary</span><i class="fa-solid fa-arrow-rotate-right text-slate-400 text-sm"></i></div>
+                  <div class="text-center my-auto">
+                    <div class="w-14 h-14 rounded-2xl bg-teal-100 text-teal-600 mx-auto flex items-center justify-center text-2xl mb-3"><i class="fa-solid fa-circle-nodes"></i></div>
+                    <h4 class="text-lg font-black text-brand-navy">Perimeter</h4>
+                  </div>
+                  <span class="text-[11px] text-center text-slate-400 font-bold">Click to flip</span>
+                </div>
+                <div class="flip-card-back bg-gradient-to-br from-teal-950 to-brand-navy text-white p-6 shadow-elevated flex flex-col justify-between">
+                  <span class="text-xs font-bold text-teal-400">Definition:</span>
+                  <p class="text-xs sm:text-sm font-medium leading-relaxed my-auto text-slate-200">The traditional 'inside is safe, outside is dangerous' boundary that cloud and remote work have blurred.</p>
+                  <span class="text-[10px] text-slate-400">Textbook p. 43, 46</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div id="print-area" class="bg-white rounded-3xl p-6 sm:p-8 shadow-soft border border-slate-200">
+          <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4 mb-6">
+            <div class="flex items-center gap-3">
+              <span class="w-9 h-9 rounded-xl bg-brand-orange text-white flex items-center justify-center"><i class="fa-solid fa-star"></i></span>
+              <div>
+                <h3 class="text-lg sm:text-xl font-black text-brand-navy">Exam-Eve Summary: Remember Always</h3>
+                <p class="text-xs text-slate-500">Essential testable insights and official curriculum takeaways</p>
+              </div>
+            </div>
+            <button onclick="copySummaryNotes()" class="px-4 py-2 bg-slate-100 hover:bg-brand-orange hover:text-white text-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-2">
+              <i class="fa-regular fa-copy"></i>
+              <span>Copy Summary to Clipboard</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm text-slate-700 leading-relaxed">
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+              <strong class="text-brand-orange block mb-1">1. Firewalls & Rules:</strong>
+              Controls traffic at network entries and exits based on preset communication rules.
+            </div>
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+              <strong class="text-brand-orange block mb-1">2. VPN Encryption:</strong>
+              Creates secure virtual tunnels over public networks, protecting remote work and branch connections.
+            </div>
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+              <strong class="text-brand-orange block mb-1">3. DMZ Separation:</strong>
+              Isolates public-facing servers from confidential internal data networks.
+            </div>
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+              <strong class="text-brand-orange block mb-1">4. Defense in Depth & Zero Trust:</strong>
+              Layered barriers combined with continuous verification of every access request.
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- TAB 3: Textbook Solutions (p. 41-48) -->
+      <div id="tab-solutions" class="tab-pane hidden space-y-8">
+        
+        <div class="bg-white rounded-3xl p-6 shadow-soft border border-slate-200">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl"><i class="fa-solid fa-book-bookmark"></i></div>
+            <div>
+              <h3 class="text-xl font-black text-brand-navy">Complete Textbook Solutions Repository (Pages 41 – 48)</h3>
+              <p class="text-xs text-slate-500">Exhaustive model solutions, step-by-step rationales, and grading rubrics for every exercise in Lesson 2-2</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2 pt-3 border-t border-slate-100 text-xs">
+            <a href="#sol-explore" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-brand-orange hover:text-white font-bold text-slate-700 transition">Pause & Think Prompts (p. 44)</a>
+            <a href="#sol-worked-example" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-brand-orange hover:text-white font-bold text-slate-700 transition">Worked Example & Try (p. 44-46)</a>
+            <a href="#sol-essay-question" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-brand-orange hover:text-white font-bold text-slate-700 transition">Exam Essay [6 Marks] (p. 45)</a>
+            <a href="#sol-end-exercises" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-brand-orange hover:text-white font-bold text-slate-700 transition">End Exercises & Review (p. 47-48)</a>
+          </div>
+        </div>
+
+        <!-- Section 1: Pause & Think Prompts -->
+        <div id="sol-explore" class="bg-white rounded-3xl p-6 sm:p-8 shadow-soft border border-slate-200">
+          <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+            <h4 class="font-black text-base text-brand-navy flex items-center gap-2">
+              <i class="fa-solid fa-compass text-brand-orange"></i>
+              Pause & Think Prompts (Textbook Page 44)
+            </h4>
+            <span class="text-xs bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md font-bold">In-Lesson Reflections</span>
+          </div>
+
+          <div class="space-y-4 text-xs sm:text-sm">
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+              <strong class="text-brand-orange block mb-1">1. Pause & Think: DMZ Isolation (Page 44):</strong>
+              <p class="text-slate-700 mb-2"><em>Prompt:</em> Why is it safer to place a public web server in a DMZ rather than inside the internal network?</p>
+              <div class="p-3 bg-white rounded-xl border border-slate-200 text-slate-600">
+                <strong>Model Solution & Rationale:</strong> Because public web servers face the Internet directly, they are vulnerable to external attacks. Placing them in a DMZ isolates them between two firewalls so that a breach on the web server cannot reach the sensitive internal databases.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Worked Example & Try Tasks -->
+        <div id="sol-worked-example" class="bg-white rounded-3xl p-6 sm:p-8 shadow-soft border border-slate-200">
+          <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+            <h4 class="font-black text-base text-brand-navy flex items-center gap-2">
+              <i class="fa-solid fa-check-double text-emerald-600"></i>
+              Worked Example & Try Tasks (Textbook Pages 44–46)
+            </h4>
+            <span class="text-xs bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-md font-bold">Step-by-Step Verified</span>
+          </div>
+
+          <div class="space-y-4 text-xs sm:text-sm">
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+              <p class="font-bold text-slate-800 mb-2">Worked Example (1) True/False Statements (p. 44):</p>
+              <ul class="space-y-1 text-slate-700">
+                <li>• A: A firewall allows or denies communication based on rules set in advance. ➔ <span class="text-emerald-600 font-bold">[ O True ]</span></li>
+                <li>• B: Using a VPN can reduce the risk of eavesdropping even on public Wi-Fi. ➔ <span class="text-emerald-600 font-bold">[ O True ]</span></li>
+                <li>• C: A DMZ is a system that exposes all servers to the outside. ➔ <span class="text-red-600 font-bold">[ X False ]</span> (It isolates public servers from internal networks).</li>
+                <li>• D: Defense in depth is the concept of layering multiple security measures. ➔ <span class="text-emerald-600 font-bold">[ O True ]</span></li>
+              </ul>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+              <p class="font-bold text-slate-800 mb-2">Try 1 & Try 2 Questions (Page 45):</p>
+              <ul class="space-y-1 text-slate-700">
+                <li>• Try 1(1) Firewall; (2) VPN; (3) DMZ; (4) Defense in depth.</li>
+                <li>• Try 2(1) NOT an appropriate use of VPN: <strong>C. Automatically deleting files infected with viruses</strong> (VPN tunnels and encrypts traffic; antivirus software handles file cleaning).</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Official Exam-Style Essay Question [6 Marks] (Page 45) -->
+        <div id="sol-essay-question" class="bg-white rounded-3xl p-6 sm:p-8 shadow-soft border-2 border-brand-orange/30">
+          <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-2">
+              <span class="w-8 h-8 rounded-xl bg-brand-orange text-white flex items-center justify-center font-bold text-xs">6M</span>
+              <h4 class="font-black text-base text-brand-navy">Exam-Style Question & Official Grading Rubric [6 Marks] (p. 45)</h4>
+            </div>
+            <span class="text-xs font-bold text-brand-orange bg-brand-orange-light px-3 py-1 rounded-full">Textbook p. 45</span>
+          </div>
+
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 mb-5 text-xs sm:text-sm font-bold text-slate-800">
+            Prompt: Explain why layering several security measures (defense in depth) protects an organization better than relying on a firewall alone. [6 Marks] In your answer: refer to what happens if one measure is breached.
+          </div>
+
+          <div class="space-y-3 text-xs sm:text-sm">
+            <div class="p-3.5 bg-white rounded-xl border-l-4 border-brand-orange border-slate-200 shadow-sm">
+              <div class="flex justify-between font-bold text-brand-navy mb-1">
+                <span>Pillar 1: Flaw of a Single Firewall Perimeter</span>
+                <span class="text-brand-orange font-black">[2 / 2 Marks]</span>
+              </div>
+              <p class="text-slate-600 leading-relaxed">Explains that relying on a single firewall creates a single point of failure; if breached, attackers gain unhindered access to the entire internal network.</p>
+            </div>
+            <div class="p-3.5 bg-white rounded-xl border-l-4 border-brand-orange border-slate-200 shadow-sm">
+              <div class="flex justify-between font-bold text-brand-navy mb-1">
+                <span>Pillar 2: Mechanism of Defense in Depth</span>
+                <span class="text-brand-orange font-black">[2 / 2 Marks]</span>
+              </div>
+              <p class="text-slate-600 leading-relaxed">Explains that defense in depth stacks multiple protective barriers (firewalls, VPNs, DMZs, and endpoints) so that breaching one layer still leaves subsequent layers operational.</p>
+            </div>
+            <div class="p-3.5 bg-white rounded-xl border-l-4 border-brand-orange border-slate-200 shadow-sm">
+              <div class="flex justify-between font-bold text-brand-navy mb-1">
+                <span>Pillar 3: Conclusion on System Safety</span>
+                <span class="text-brand-orange font-black">[2 / 2 Marks]</span>
+              </div>
+              <p class="text-slate-600 leading-relaxed">Synthesizes how layered measures drastically reduce organizational risk and maintain overall system integrity during an attack.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 4: End-of-Lesson Exercises & Review -->
+        <div id="sol-end-exercises" class="bg-white rounded-3xl p-6 sm:p-8 shadow-soft border border-slate-200">
+          <h4 class="font-black text-base text-brand-navy mb-4 border-b border-slate-100 pb-3">End-of-Lesson Exercises & Review Key (Textbook Pages 47–48)</h4>
+          <div class="space-y-4 text-xs sm:text-sm text-slate-700">
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+              <strong class="text-brand-navy block mb-1">Exercise 2: Passage Fill-in-the-Blanks (p. 47)</strong>
+              <p class="text-slate-600 mb-2">Blanks (a)-(d): (a) <strong>firewall</strong>; (b) <strong>DMZ</strong>; (c) <strong>VPN</strong>; (d) <strong>defense in depth</strong>.</p>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+              <strong class="text-brand-navy block mb-1">Exercise 3(2): Zero Trust Description (p. 47)</strong>
+              <p class="text-slate-600">Correct Choice: <strong>C. No communication is trusted and is always verified</strong> (reflecting modern cloud and remote work reality).</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- TAB 4: Exam Engine - 50 Questions (True Randomized Answers & English Feedback) -->
+      <div id="tab-exam" class="tab-pane hidden space-y-8">
+        
+        <div id="exam-engine-view" class="space-y-6">
+          <div class="bg-white rounded-3xl p-6 shadow-soft border border-slate-200">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+              <div>
+                <span class="text-xs font-black text-brand-orange uppercase tracking-wider">Comprehensive Question Bank • 50 Questions</span>
+                <h3 class="text-xl font-black text-brand-navy">Lesson 2-2 Interactive Assessment Engine</h3>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="text-xs font-bold text-slate-500">Answered: <span id="answered-count" class="text-brand-orange font-black">0</span> / 50</span>
+                <div class="w-32 bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                  <div id="exam-progress-fill" class="bg-brand-orange h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-3 border-t border-slate-100">
+              <div class="text-[11px] font-bold text-slate-500 mb-2 flex items-center justify-between">
+                <span>Quick Navigation Matrix (1 - 50):</span>
+                <div class="flex items-center gap-3 text-[10px]">
+                  <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Answered</span>
+                  <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-brand-orange"></span> Current</span>
+                  <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-slate-200"></span> Pending</span>
+                </div>
+              </div>
+              <div id="question-jump-grid" class="grid grid-cols-10 sm:grid-cols-10 md:grid-cols-25 gap-1.5"></div>
+            </div>
+          </div>
+
+          <div id="current-question-card" class="bg-white rounded-3xl p-6 sm:p-8 shadow-elevated border border-slate-200 relative min-h-[320px] flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span id="question-tier-badge" class="px-3 py-1 rounded-full text-xs font-black bg-blue-50 text-blue-700 border border-blue-200">Category</span>
+                <span id="question-number-display" class="text-xs font-black text-slate-400">Question 1 of 50</span>
+              </div>
+              <h4 id="question-prompt" class="text-base sm:text-lg font-black text-brand-navy mb-6 leading-relaxed">Loading question...</h4>
+              <div id="options-container" class="space-y-3 mb-6"></div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+              <button onclick="toggleExamHint()" class="text-xs font-bold text-slate-500 hover:text-brand-orange flex items-center gap-1.5 transition py-2 px-3 rounded-xl hover:bg-orange-50">
+                <i class="fa-regular fa-lightbulb text-brand-orange"></i>
+                <span id="hint-btn-text">Pedagogical Scaffolding Hint</span>
+              </button>
+
+              <div class="flex items-center gap-2">
+                <button id="btn-prev-q" onclick="navigateQuestion(-1)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition">
+                  <i class="fa-solid fa-chevron-left mr-1"></i> Previous
+                </button>
+                <button id="btn-next-q" onclick="navigateQuestion(1)" class="px-5 py-2 bg-brand-navy hover:bg-brand-navy-light text-white rounded-xl text-xs font-bold transition">
+                  Next <i class="fa-solid fa-chevron-right ml-1"></i>
+                </button>
+                <button id="btn-submit-exam" onclick="submitExamForGrading()" class="px-5 py-2 bg-brand-orange hover:bg-brand-orange-dark text-white rounded-xl text-xs font-bold transition shadow hidden">
+                  Submit & Calculate Score 🏁
+                </button>
+              </div>
+            </div>
+
+            <div id="in-question-hint-box" class="hidden mt-3 p-3.5 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900 leading-relaxed">
+              <i class="fa-solid fa-info-circle mr-1 text-amber-600"></i>
+              <span id="hint-content-text">Hint text...</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="exam-results-view" class="hidden space-y-8">
+          <div id="score-banner" class="bg-white rounded-3xl p-6 sm:p-8 shadow-elevated border-2 text-center">
+            <div id="score-icon-container" class="w-20 h-20 rounded-3xl mx-auto flex items-center justify-center text-4xl mb-4"></div>
+            <h3 id="student-score-name" class="text-2xl font-black text-brand-navy mb-1">Student Evaluation</h3>
+            <div class="flex items-center justify-center gap-2 my-3">
+              <span class="text-3xl sm:text-4xl font-black text-brand-orange" id="raw-score-display">0</span>
+              <span class="text-slate-400 text-xl font-bold">/ 50</span>
+              <span class="text-xl font-black text-brand-navy px-3 py-1 bg-slate-100 rounded-xl ml-2" id="percent-score-display">0%</span>
+            </div>
+            <p id="score-tier-message" class="text-sm font-bold max-w-xl mx-auto leading-relaxed mt-2 text-slate-700"></p>
+            
+            <div class="mt-6 flex flex-wrap justify-center gap-3">
+              <button onclick="retakeExam()" class="px-6 py-2.5 bg-brand-orange hover:bg-brand-orange-dark text-white rounded-xl text-xs sm:text-sm font-bold shadow transition">
+                <i class="fa-solid fa-rotate-right mr-1"></i> Retake Full Exam
+              </button>
+              <button onclick="switchTab('tab-explanation')" class="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs sm:text-sm font-bold transition">
+                <i class="fa-solid fa-book-open mr-1"></i> Review Lesson Explanation
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-soft border border-slate-200">
+            <div class="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
+              <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-xl bg-brand-navy text-white flex items-center justify-center text-sm"><i class="fa-solid fa-list-check"></i></span>
+                <h4 class="font-black text-lg text-brand-navy">Detailed 50-Question Examination Audit & Rationale</h4>
+              </div>
+              <span class="text-xs font-bold text-slate-500">Review correct answers and curriculum explanations</span>
+            </div>
+            <div id="audit-questions-list" class="space-y-4"></div>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+
+    <div id="toast-box" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+      <div class="bg-brand-navy text-white px-5 py-3 rounded-2xl shadow-elevated border border-slate-700 text-xs sm:text-sm font-bold flex items-center gap-3">
+        <i class="fa-solid fa-bell text-brand-orange"></i>
+        <span id="toast-message">Notification</span>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Application Script Logic -->
+  <script>
+    const appState = {
+      studentName: '',
+      activeScreen: 'screen-landing',
+      activeTab: 'tab-explanation',
+      currentExamIndex: 0,
+      userAnswers: new Array(50).fill(null),
+      examSubmitted: false,
+      speechUtterance: null
+    };
+
+    /* Simulation Logic for Network Security Components */
+    function setNetSimComponent(comp) {
+      ['firewall', 'vpn', 'dmz'].forEach(c => {
+        const btn = document.getElementById(`net-btn-${c}`);
+        if (c === comp) {
+          btn.className = 'p-3.5 rounded-xl text-left border-2 transition bg-brand-orange text-white border-brand-orange shadow';
+        } else {
+          btn.className = 'p-3.5 rounded-xl text-left border-2 transition bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700';
+        }
+      });
+
+      const out = document.getElementById('net-sim-output');
+      if (comp === 'firewall') {
+        out.innerHTML = `
+          <strong class="text-orange-400 text-sm block mb-2 font-black">Firewall (Textbook p. 42)</strong>
+          <p class="mb-2 text-slate-300">Installed at the entry/exit point of a network. It allows or denies communication based on rules set in advance (e.g., allow public web traffic, block direct external access to internal databases).</p>
+          <div class="mt-2 pt-2 border-t border-slate-800 text-[11px] text-orange-300 font-mono"><strong>Role:</strong> Perimeter traffic filtration and rule-based packet blocking.</div>
+        `;
+      } else if (comp === 'vpn') {
+        out.innerHTML = `
+          <strong class="text-orange-400 text-sm block mb-2 font-black">VPN (Virtual Private Network) (Textbook p. 42)</strong>
+          <p class="mb-2 text-slate-300">Creates an encrypted virtual private line (tunnel) over the Internet, allowing safe connection to an organization's network from remote locations or public Wi-Fi without eavesdropping risks.</p>
+          <div class="mt-2 pt-2 border-t border-slate-800 text-[11px] text-orange-300 font-mono"><strong>Role:</strong> Secure encrypted tunneling for remote work and branch offices.</div>
+        `;
+      } else {
+        out.innerHTML = `
+          <strong class="text-orange-400 text-sm block mb-2 font-black">DMZ (Demilitarized Zone) (Textbook p. 42, 44)</strong>
+          <p class="mb-2 text-slate-300">An isolated buffer zone where public-facing servers (web servers, mail servers) are placed separately from the internal network. Even if a public server is attacked, internal data remains secure.</p>
+          <div class="mt-2 pt-2 border-t border-slate-800 text-[11px] text-orange-300 font-mono"><strong>Role:</strong> Server isolation and protection of internal confidential databases.</div>
+        `;
+      }
+      showToast(`Switched to network component: ${comp.toUpperCase()}`);
+    }
+
+    /* 50-Question Comprehensive Exam Bank for Lesson 2-2 with True Randomized Answers across A, B, C, D */
+    const questionBank = [
+      {
+        id: 1, tier: "Fill in the Blanks", tierClass: "bg-blue-50 text-blue-700 border-blue-200",
+        prompt: "Complete the sentence: The system installed at the entry/exit point of a network that allows or denies communication based on rules set in advance is a _____.",
+        options: ["router", "firewall", "switch", "gateway"],
+        correct: 1, hint: "Perimeter traffic control system.", rationale: "Textbook p. 42: A firewall allows or denies communication based on rules set in advance."
+      },
+      {
+        id: 2, tier: "Fill in the Blanks", tierClass: "bg-blue-50 text-blue-700 border-blue-200",
+        prompt: "Complete the sentence: The technology that creates an encrypted virtual private line over the Internet for safe remote connection is abbreviated as _____.",
+        options: ["LAN", "WAN", "VPN", "DNS"],
+        correct: 2, hint: "Virtual Private Network abbreviation.", rationale: "Textbook p. 42: VPN creates an encrypted virtual private tunnel over the Internet."
+      },
+      {
+        id: 3, tier: "Fill in the Blanks", tierClass: "bg-blue-50 text-blue-700 border-blue-200",
+        prompt: "Complete the sentence: The area where public-facing servers are placed separately from the internal network is known as the _____.",
+        options: ["DMZ", "LAN", "WAN", "VLAN"],
+        correct: 0, hint: "Demilitarized Zone abbreviation.", rationale: "Textbook p. 42: DMZ is an area where public-facing servers are separated from the internal network."
+      },
+      {
+        id: 4, tier: "Fill in the Blanks", tierClass: "bg-blue-50 text-blue-700 border-blue-200",
+        prompt: "Complete the sentence: The security concept of layering multiple security measures so that if one is breached, another still protects the system is called defense in _____.",
+        options: ["depth", "layers", "security", "perimeter"],
+        correct: 0, hint: "Stacking multiple defensive tiers.", rationale: "Textbook p. 43: Defense in depth is the concept of layering multiple security measures."
+      },
+      {
+        id: 5, tier: "Fill in the Blanks", tierClass: "bg-blue-50 text-blue-700 border-blue-200",
+        prompt: "Complete the sentence: The modern security concept that means the system does not trust any communication, including internal traffic, and always verifies it is called zero _____.",
+        options: ["trust", "access", "boundary", "verify"],
+        correct: 0, hint: "Assuming zero implicit trust.", rationale: "Textbook p. 43, 44: Zero trust means the system trusts no communication and always verifies it."
+      },
+      {
+        id: 6, tier: "Fill in the Blanks", tierClass: "bg-blue-50 text-blue-700 border-blue-200",
+        prompt: "Complete the sentence: Traditional network security was designed mainly around protecting a _____ based on the premise that 'inside is safe and outside is dangerous.'",
+        options: ["gateway", "perimeter", "server", "firewall"],
+        correct: 1, hint: "Outer boundary line.", rationale: "Textbook p. 43, 46: Traditional network security protected a perimeter."
+      },
+      {
+        id: 7, tier: "Fill in the Blanks", tierClass: "bg-blue-50 text-blue-700 border-blue-200",
+        prompt: "Complete the sentence: In a DMZ network configuration, public-facing servers are isolated between two _____.",
+        options: ["switches", "firewalls", "routers", "bridges"],
+        correct: 1, hint: "Perimeter filter devices.", rationale: "Textbook p. 44: DMZ isolates public servers using firewalls."
+      },
+      {
+        id: 8, tier: "Fill in the Blanks", tierClass: "bg-blue-50 text-blue-700 border-blue-200",
+        prompt: "Complete the sentence: Layer 4 of defense in depth involves endpoint measures such as installing antivirus software and updating the _____.",
+        options: ["operating system", "browser", "database", "network cable"],
+        correct: 0, hint: "System software on user devices.", rationale: "Textbook p. 43: Endpoint protection includes OS updates and antivirus."
+      },
+      {
+        id: 9, tier: "Fill in the Blanks", tierClass: "bg-blue-50 text-blue-700 border-blue-200",
+        prompt: "Complete the sentence: A VPN reduces the risk of eavesdropping even when users connect via public _____.",
+        options: ["Wi-Fi", "servers", "cables", "switches"],
+        correct: 0, hint: "Unsecured wireless networks.", rationale: "Textbook p. 42: VPN reduces eavesdropping risks on public Wi-Fi."
+      },
+      {
+        id: 10, tier: "Fill in the Blanks", tierClass: "bg-blue-50 text-blue-700 border-blue-200",
+        prompt: "Complete the sentence: Because cloud services and remote work have blurred the internal/external boundary, designs protecting only the _____ have become insufficient.",
+        options: ["perimeter", "database", "password", "cable"],
+        correct: 0, hint: "Old boundary line.", rationale: "Textbook p. 43: Designs protecting only the perimeter have become insufficient."
+      },
+
+      // Definitions & Concepts (Q11 - Q20)
+      {
+        id: 11, tier: "Definitions", tierClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        prompt: "What is the primary operational function of a firewall?",
+        options: ["To speed up internet connection speeds", "To allow or deny network communication based on preset rules", "To store encrypted user passwords", "To design web application frontends"],
+        correct: 1, hint: "Filtering traffic by rules.", rationale: "Textbook p. 42: A firewall allows or denies communication based on rules set in advance."
+      },
+      {
+        id: 12, tier: "Definitions", tierClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        prompt: "How does a VPN protect data transmitted from a remote worker's laptop?",
+        options: ["By compressing files to save bandwidth", "By creating an encrypted virtual private tunnel over the Internet", "By blocking all incoming emails", "By disconnecting unauthorized USB drives"],
+        correct: 1, hint: "Encrypted virtual tunnel.", rationale: "Textbook p. 42: VPN creates an encrypted virtual private line (tunnel) over the Internet."
+      },
+      {
+        id: 13, tier: "Definitions", tierClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        prompt: "What is the primary purpose of a DMZ in network architecture?",
+        options: ["To speed up database search queries", "To separate public-facing servers from the internal confidential network", "To automatically update antivirus software", "To store user profile pictures"],
+        correct: 1, hint: "Isolating public servers from internal data.", rationale: "Textbook p. 42, 44: DMZ isolates servers exposed to the external network from the internal network."
+      },
+      {
+        id: 14, tier: "Definitions", tierClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        prompt: "What does the concept of 'defense in depth' mean?",
+        options: ["Using a single extremely powerful firewall", "Layering multiple security measures so that if one fails, the next still protects the system", "Storing all data in deep underground cloud bunkers", "Encrypting passwords twice with public keys"],
+        correct: 1, hint: "Multiple stacked defensive layers.", rationale: "Textbook p. 43: Defense in depth is the concept of layering multiple security measures."
+      },
+      {
+        id: 15, tier: "Definitions", tierClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        prompt: "What is the core principle of 'zero trust' network security?",
+        options: ["Trusting all users who log in from company offices", "Assuming no communication is trusted by default and verifying every access request", "Eliminating all passwords in favor of biometrics", "Allowing free data sharing between branch offices"],
+        correct: 1, hint: "Verify every access request.", rationale: "Textbook p. 43, 44: Zero trust means the system trusts no communication and always verifies it."
+      },
+      {
+        id: 16, tier: "Definitions", tierClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        prompt: "Why has traditional perimeter security become insufficient in modern enterprise networks?",
+        options: ["Because firewalls are no longer manufactured", "Because cloud services and remote work have blurred the 'inside' and 'outside' boundaries", "Because computers are now too fast for firewalls", "Because hackers no longer target web servers"],
+        correct: 1, hint: "Blurring of internal and external boundaries.", rationale: "Textbook p. 43: Cloud services and remote work have blurred the boundary, making perimeter defense insufficient."
+      },
+      {
+        id: 17, tier: "Definitions", tierClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        prompt: "Which layer of defense in depth corresponds to installing antivirus software on user PCs?",
+        options: ["Network entry", "Communication path", "Server placement", "Endpoints"],
+        correct: 3, hint: "User devices at the edge.", rationale: "Textbook p. 43: Endpoints layer includes antivirus software and OS updates on user devices."
+      },
+      {
+        id: 18, tier: "Definitions", tierClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        prompt: "What specific threat does a VPN primarily mitigate during remote work?",
+        options: ["Server hardware overheating", "Eavesdropping on communication over public networks", "Typing errors in passwords", "Phishing emails sent to employees"],
+        correct: 1, hint: "Intercepting communication over public Wi-Fi.", rationale: "Textbook p. 42: VPN encryption reduces the risk of eavesdropping on public Wi-Fi."
+      },
+      {
+        id: 19, tier: "Definitions", tierClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        prompt: "What happens to the internal network if a web server placed inside a DMZ is compromised by attackers?",
+        options: ["The entire database is instantly deleted", "The internal network remains protected because the DMZ is separated by firewalls", "All client passwords are leaked automatically", "The firewall shuts down permanently"],
+        correct: 1, hint: "Internal network stays protected.", rationale: "Textbook p. 42, 44: Even if a public-facing server is attacked, damage to the internal network is prevented."
+      },
+      {
+        id: 20, tier: "Definitions", tierClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        prompt: "What is the main limitation of relying on a single security barrier like a firewall?",
+        options: ["It consumes too much electricity", "If that single barrier is breached, the entire system inside is exposed", "It cannot be configured with rules", "It only works during daytime hours"],
+        correct: 1, hint: "Single point of failure.", rationale: "Textbook p. 42: A single lock is not enough; if picked, everything inside is exposed."
+      },
+
+      // Give Reasons / Explain Why (Q21 - Q30)
+      {
+        id: 21, tier: "Give Reasons", tierClass: "bg-amber-50 text-amber-700 border-amber-200",
+        prompt: "Give a reason: Why is a single lock on the front door (like a single firewall) considered inadequate for robust network security?",
+        options: ["Because firewalls are expensive", "Because if that single barrier is breached or bypassed, all internal data is left completely unprotected", "Because firewalls only work on wireless networks", "Because single firewalls cannot block spam emails"],
+        correct: 1, hint: "Total exposure upon breach.", rationale: "Textbook p. 42: If a single lock is picked, everything inside is exposed."
+      },
+      {
+        id: 22, tier: "Give Reasons", tierClass: "bg-amber-50 text-amber-700 border-amber-200",
+        prompt: "Give a reason: Why must public web servers be isolated in a DMZ rather than placed directly on the internal network?",
+        options: ["To make them load web pages faster", "Because they are exposed to the Internet and vulnerable to attacks, isolating them prevents attackers from reaching internal confidential databases", "Because internal computers do not support web traffic", "Because DMZs eliminate the need for firewalls"],
+        correct: 1, hint: "Preventing attacks from reaching internal data.", rationale: "Textbook p. 42, 44: DMZ separates public servers so an attack cannot reach the internal network."
+      },
+      {
+        id: 23, tier: "Give Reasons", tierClass: "bg-amber-50 text-amber-700 border-amber-200",
+        prompt: "Give a reason: Why does zero trust perform identity and permission checks even for access originating from inside the organization's network?",
+        options: ["To slow down network traffic", "Because internal users or compromised internal devices can pose security threats, so no traffic is trusted implicitly", "Because internal networks do not have IP addresses", "Because firewalls cannot inspect internal packets"],
+        correct: 1, hint: "No implicit internal trust.", rationale: "Textbook p. 43, 44: Zero trust assumes threats can exist inside as well as outside the network."
+      },
+      {
+        id: 24, tier: "Give Reasons", tierClass: "bg-amber-50 text-amber-700 border-amber-200",
+        prompt: "Give a reason: Why is defense in depth superior to relying on perimeter defense alone?",
+        options: ["It reduces server maintenance costs", "If one defensive layer is breached, subsequent layers (VPN, DMZ, endpoints) still protect the system", "It increases network bandwidth", "It eliminates the need for passwords"],
+        correct: 1, hint: "Multiple backup barriers.", rationale: "Textbook p. 43: Even if one measure is breached, the next can still protect the system."
+      },
+      {
+        id: 25, tier: "Give Reasons", tierClass: "bg-amber-50 text-amber-700 border-amber-200",
+        prompt: "Give a reason: Why does a VPN reduce eavesdropping risks when employees work from cafes using public Wi-Fi?",
+        options: ["Public Wi-Fi routers are automatically encrypted", "All communication data passing through the VPN tunnel is strongly encrypted", "Cafes block all unauthorized hackers", "VPNs disconnect computers when insecure"],
+        correct: 1, hint: "Encrypted virtual tunnel.", rationale: "Textbook p. 42: Communication content is encrypted when using a VPN, reducing eavesdropping risks."
+      },
+      {
+        id: 26, tier: "Give Reasons", tierClass: "bg-amber-50 text-amber-700 border-amber-200",
+        prompt: "Give a reason: Why are firewalls configured with specific rules rather than blocking all traffic entirely?",
+        options: ["To allow legitimate external users (like customers) to access web services while blocking unauthorized access", "Because unconfigured firewalls delete files", "To allow computers to update their clocks", "To reduce electricity consumption"],
+        correct: 0, hint: "Balancing access and security.", rationale: "Textbook p. 42: Firewalls allow communication based on rules (e.g., allow web server, deny direct DB access)."
+      },
+      {
+        id: 27, tier: "Give Reasons", tierClass: "bg-amber-50 text-amber-700 border-amber-200",
+        prompt: "Give a reason: Why has the spread of cloud computing made traditional perimeter security obsolete?",
+        options: ["Cloud servers do not have firewalls", "Data and applications now reside outside the traditional office perimeter, making 'inside is safe' untrue", "Cloud computing stops hackers from attacking", "Cloud services require plain HTTP"],
+        correct: 1, hint: "Data moving outside the office walls.", rationale: "Textbook p. 43: Cloud services and remote work blurred the internal/external boundary."
+      },
+      {
+        id: 28, tier: "Give Reasons", tierClass: "bg-amber-50 text-amber-700 border-amber-200",
+        prompt: "Give a reason: Why is endpoint protection (Layer 4) a necessary part of defense in depth?",
+        options: ["Because network firewalls cannot protect individual user laptops if malware is brought in directly", "To make computer screens brighter", "To organize desktop files automatically", "To increase processor speed"],
+        correct: 0, hint: "Securing devices at the edge.", rationale: "Textbook p. 43: Endpoints protect individual devices where users interact with the network."
+      },
+      {
+        id: 29, tier: "Give Reasons", tierClass: "bg-amber-50 text-amber-700 border-amber-200",
+        prompt: "Give a reason: Why is keeping operating systems and antivirus software updated crucial for network security?",
+        options: ["To prevent newly discovered software vulnerabilities from being exploited by attackers", "To change computer wallpaper automatically", "To make web browsers load faster", "To increase hard drive storage capacity"],
+        correct: 0, hint: "Patching vulnerabilities.", rationale: "Textbook p. 43: Endpoint protection keeps OS updated to prevent exploitation."
+      },
+      {
+        id: 30, tier: "Give Reasons", tierClass: "bg-amber-50 text-amber-700 border-amber-200",
+        prompt: "Give a reason: Why does an organization connect branch offices securely using a VPN?",
+        options: ["To share files and communicate across different locations without risking interception over the open Internet", "To reduce telephone bill costs", "To synchronize computer clocks exactly", "To share printer ink"],
+        correct: 0, hint: "Connecting branches safely.", rationale: "Textbook p. 42: VPN main uses include connecting offices in different locations safely."
+      },
+
+      // Comparisons (Q31 - Q40)
+      {
+        id: 31, tier: "Comparison", tierClass: "bg-purple-50 text-purple-700 border-purple-200",
+        prompt: "Compare network components: Which component controls traffic at the entry/exit point of a network based on rules?",
+        options: ["VPN", "Firewall", "DMZ", "Database"],
+        correct: 1, hint: "Entry/exit rule filter.", rationale: "Textbook p. 42: A firewall is installed at the entry/exit point of a network."
+      },
+      {
+        id: 32, tier: "Comparison", tierClass: "bg-purple-50 text-purple-700 border-purple-200",
+        prompt: "Compare network components: Which component establishes an encrypted virtual tunnel over the public Internet?",
+        options: ["Firewall", "DMZ", "VPN", "Switch"],
+        correct: 2, hint: "Encrypted virtual private line.", rationale: "Textbook p. 42: VPN creates an encrypted virtual private line over the Internet."
+      },
+      {
+        id: 33, tier: "Comparison", tierClass: "bg-purple-50 text-purple-700 border-purple-200",
+        prompt: "Compare network components: Which zone is specifically designated for housing public-facing web and mail servers?",
+        options: ["Internal network", "DMZ", "Client local storage", "Cloud database core"],
+        correct: 1, hint: "DeMilitarized Zone.", rationale: "Textbook p. 42: DMZ is where servers exposed to the external network are placed."
+      },
+      {
+        id: 34, tier: "Comparison", tierClass: "bg-purple-50 text-purple-700 border-purple-200",
+        prompt: "Compare security philosophies: What is the main difference between traditional perimeter defense and zero trust?",
+        options: ["Traditional trusts inside traffic implicitly, while zero trust verifies every access request regardless of origin", "Traditional uses encryption, while zero trust uses firewalls", "Traditional is for cloud, while zero trust is for paper records", "There is no difference"],
+        correct: 0, hint: "Implicit internal trust vs verify every access.", rationale: "Textbook p. 43, 44: Traditional trusts internal network; zero trust verifies every access."
+      },
+      {
+        id: 35, tier: "Comparison", tierClass: "bg-purple-50 text-purple-700 border-purple-200",
+        prompt: "Compare defense in depth layers: Which layer corresponds to protecting communication paths?",
+        options: ["Network entry", "Communication path (VPN)", "Server placement", "Endpoints"],
+        correct: 1, hint: "Layer 2 encryption.", rationale: "Textbook p. 43: Layer 2 communication path uses VPN encryption."
+      },
+      {
+        id: 36, tier: "Comparison", tierClass: "bg-purple-50 text-purple-700 border-purple-200",
+        prompt: "Compare defense in depth layers: Which layer corresponds to server isolation?",
+        options: ["Network entry", "Communication path", "Server placement (DMZ)", "Endpoints"],
+        correct: 2, hint: "Layer 3 server placement.", rationale: "Textbook p. 43: Layer 3 server placement uses a DMZ."
+      },
+      {
+        id: 37, tier: "Comparison", tierClass: "bg-purple-50 text-purple-700 border-purple-200",
+        prompt: "Compare security concepts: What does 'perimeter' refer to in network security discussions?",
+        options: ["The physical fence around an office building", "The traditional boundary line separating the safe internal network from the dangerous outside", "The encryption key length", "The firewall rule list"],
+        correct: 1, hint: "Inside vs outside boundary.", rationale: "Textbook p. 43, 46: Perimeter is the old 'inside is safe, outside is dangerous' boundary."
+      },
+      {
+        id: 38, tier: "Comparison", tierClass: "bg-purple-50 text-purple-700 border-purple-200",
+        prompt: "Compare remote work technologies: Why is connecting via a VPN safer than connecting directly over open Wi-Fi?",
+        options: ["VPNs encrypt all transmitted data, preventing eavesdropping", "VPNs make computers run faster", "VPNs delete malware automatically", "VPNs eliminate passwords"],
+        correct: 0, hint: "Encryption against eavesdropping.", rationale: "Textbook p. 42: Communication content is encrypted when using a VPN."
+      },
+      {
+        id: 39, tier: "Comparison", tierClass: "bg-purple-50 text-purple-700 border-purple-200",
+        prompt: "Compare server protections: What protects the internal database server if an attacker breaches the web server in a DMZ?",
+        options: ["The internal firewall separating the DMZ from the internal network", "The user's web browser", "The VPN tunnel encryption", "Antivirus on the web server"],
+        correct: 0, hint: "Firewall between DMZ and internal network.", rationale: "Textbook p. 42, 44: The internal firewall prevents damage to the internal network."
+      },
+      {
+        id: 40, tier: "Comparison", tierClass: "bg-purple-50 text-purple-700 border-purple-200",
+        prompt: "Compare security strategies: Why do modern organizations adopt both defense in depth and zero trust?",
+        options: ["To maximize protection against sophisticated breaches across cloud and on-premise environments", "To comply with hardware manufacturing rules", "To reduce computer monitor sizes", "To make internet browsing slower"],
+        correct: 0, hint: "Comprehensive modern protection.", rationale: "Textbook p. 42-44: Combining layers and verifying every access ensures robust security against modern threats."
+      },
+
+      // Matching & Synthesis (Q41 - Q50)
+      {
+        id: 41, tier: "Matching & Synthesis", tierClass: "bg-slate-100 text-slate-800 border-slate-300",
+        prompt: "Matching Task (p. 44): Which term matches 'A system installed at the entry/exit point of a network that allows or denies communication based on rules'?",
+        options: ["DMZ", "Firewall", "VPN", "Endpoint"],
+        correct: 1, hint: "Worked Example (2) c.", rationale: "Textbook p. 44: System allowing/denying communication by rules is a firewall."
+      },
+      {
+        id: 42, tier: "Matching & Synthesis", tierClass: "bg-slate-100 text-slate-800 border-slate-300",
+        prompt: "Matching Task (p. 44): Which term matches 'An area where servers exposed to the outside are placed separately from the internal network'?",
+        options: ["DMZ", "Firewall", "VPN", "Perimeter"],
+        correct: 0, hint: "Worked Example (2) b.", rationale: "Textbook p. 44: Isolated area for public servers is a DMZ."
+      },
+      {
+        id: 43, tier: "Matching & Synthesis", tierClass: "bg-slate-100 text-slate-800 border-slate-300",
+        prompt: "Matching Task (p. 44): Which term matches 'A technology that creates an encrypted virtual private line over the Internet'?",
+        options: ["Firewall", "VPN", "DMZ", "Router"],
+        correct: 1, hint: "Worked Example (2) a.", rationale: "Textbook p. 44: Encrypted virtual private line is a VPN."
+      },
+      {
+        id: 44, tier: "Matching & Synthesis", tierClass: "bg-slate-100 text-slate-800 border-slate-300",
+        prompt: "Concept Application (p. 43): Which defense in depth layer blocks unauthorized communication using a firewall?",
+        options: ["Network entry", "Communication path", "Server placement", "Endpoints"],
+        correct: 0, hint: "Layer 1.", rationale: "Textbook p. 43: Layer 1 network entry uses a firewall."
+      },
+      {
+        id: 45, tier: "Matching & Synthesis", tierClass: "bg-slate-100 text-slate-800 border-slate-300",
+        prompt: "Concept Application (p. 43): Which defense in depth layer encrypts communication using a VPN?",
+        options: ["Network entry", "Communication path", "Server placement", "Endpoints"],
+        correct: 1, hint: "Layer 2.", rationale: "Textbook p. 43: Layer 2 communication path uses a VPN."
+      },
+      {
+        id: 46, tier: "Matching & Synthesis", tierClass: "bg-slate-100 text-slate-800 border-slate-300",
+        prompt: "True/False Evaluation (p. 44): Is it True or False that a firewall controls communication based on rules set in advance?",
+        options: ["True (O)", "False (X)", "True only for wireless routers", "False - firewalls block all traffic"],
+        correct: 0, hint: "Worked Example (1) A.", rationale: "Textbook p. 44: Statement A is True."
+      },
+      {
+        id: 47, tier: "Matching & Synthesis", tierClass: "bg-slate-100 text-slate-800 border-slate-300",
+        prompt: "True/False Evaluation (p. 44): Is it True or False that a DMZ is a system that exposes all internal servers directly to the outside?",
+        options: ["True (O)", "False (X)", "True for database servers", "False only for printers"],
+        correct: 1, hint: "Worked Example (1) C.", rationale: "Textbook p. 44: Statement C is False (a DMZ isolates public servers away from internal networks)."
+      },
+      {
+        id: 48, tier: "Matching & Synthesis", tierClass: "bg-slate-100 text-slate-800 border-slate-300",
+        prompt: "Security Integration (p. 47): What does the concept of zero trust state regarding internal network communication?",
+        options: ["Internal traffic is trusted automatically", "No communication is trusted and everything is verified", "Firewalls are unnecessary inside the network", "VPNs are only used outside buildings"],
+        correct: 1, hint: "Never trust, always verify.", rationale: "Textbook p. 47: Zero trust states no communication is trusted and all is verified."
+      },
+      {
+        id: 49, tier: "Matching & Synthesis", tierClass: "bg-slate-100 text-slate-800 border-slate-300",
+        prompt: "Security Integration (p. 47): What is the primary purpose of providing a DMZ in a corporate network?",
+        options: ["To speed up employee file downloads", "To prevent damage to the internal network even if a public-facing server is attacked", "To eliminate the need for antivirus software", "To allow wireless printing"],
+        correct: 1, hint: "Protecting internal data from public server breaches.", rationale: "Textbook p. 47: DMZ prevents damage to the internal network if public servers are attacked."
+      },
+      {
+        id: 50, tier: "Matching & Synthesis", tierClass: "bg-slate-100 text-slate-800 border-slate-300",
+        prompt: "Core Lesson Takeaway (p. 47): What is the ultimate takeaway of Lesson 2-2 regarding network security design?",
+        options: ["Relying on a single firewall is sufficient for any enterprise.", "Layer defenses (firewall, VPN, DMZ, endpoints) and verify every access (zero trust) so a single breach does not expose the whole network.", "Security depends entirely on user passwords.", "Network security is obsolete in cloud environments."],
+        correct: 1, hint: "Key takeaway box p. 47.", rationale: "Textbook p. 47: Layer defenses and verify every access; one breach is then far less likely to expose the whole network."
+      }
+    ];
+
+    function goToNameEntry() {
+      document.getElementById('screen-landing').classList.add('hidden');
+      document.getElementById('screen-name-entry').classList.remove('hidden');
+      document.getElementById('student-name-input').focus();
+    }
+
+    function goToLanding() {
+      document.getElementById('screen-name-entry').classList.add('hidden');
+      document.getElementById('screen-landing').classList.remove('hidden');
+    }
+
+    function handleNameKeypress(e) {
+      if (e.key === 'Enter') submitStudentName();
+    }
+
+    function submitStudentName() {
+      const input = document.getElementById('student-name-input');
+      const val = input.value.trim();
+      const err = document.getElementById('name-error');
+      
+      if (!val) {
+        err.classList.remove('hidden');
+        input.classList.add('border-red-500');
+        return;
+      }
+      
+      err.classList.add('hidden');
+      input.classList.remove('border-red-500');
+      appState.studentName = val;
+      
+      document.getElementById('header-student-name').textContent = val;
+      document.getElementById('screen-name-entry').classList.add('hidden');
+      document.getElementById('screen-main-platform').classList.remove('hidden');
+      
+      initExamJumpGrid();
+      renderExamQuestion(0);
+      showToast(`Welcome, ${val}! Interactive revision unlocked.`);
+    }
+
+    function logoutToLanding() {
+      if (appState.speechUtterance) window.speechSynthesis.cancel();
+      document.getElementById('screen-main-platform').classList.add('hidden');
+      document.getElementById('screen-landing').classList.remove('hidden');
+      showToast('Logged out successfully.');
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+      document.getElementById(tabId).classList.remove('hidden');
+      appState.activeTab = tabId;
+
+      const tabs = ['explanation', 'revision', 'solutions', 'exam'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`nav-btn-${t}`);
+        if (`tab-${t}` === tabId) {
+          btn.className = 'tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 whitespace-nowrap transition bg-brand-orange text-white';
+        } else {
+          btn.className = 'tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 whitespace-nowrap transition text-slate-300 hover:bg-brand-navy-light';
+        }
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleAnswer(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('hidden');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast-box');
+      const text = document.getElementById('toast-message');
+      text.textContent = msg;
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      setTimeout(() => {
+        toast.classList.add('translate-y-24', 'opacity-0');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 3500);
+    }
+
+    function copySummaryNotes() {
+      const text = `Lesson 2-2 Summary: Network Security Design | be;school\n
+1. Firewalls:
+- Controls communication at network entry/exit based on rules.
+
+2. VPN (Virtual Private Network):
+- Creates encrypted virtual private lines over the Internet for secure remote work.
+
+3. DMZ (Demilitarized Zone):
+- Isolates public-facing web servers from internal database networks.
+
+4. Defense in Depth & Zero Trust:
+- Layering multiple defenses (entry, path, servers, endpoints) and verifying every access request unconditionally.`;
+
+      const temp = document.createElement('textarea');
+      temp.value = text;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      document.body.removeChild(temp);
+      showToast('Summary copied to clipboard!');
+    }
+
+    function playAudioSummary() {
+      if (!('speechSynthesis' in window)) {
+        showToast('Speech synthesis not supported in this browser.');
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const text = document.getElementById('audio-script-text').textContent;
+      const utterance = new SpeechSynthesisUtterance(text);
+      const voices = window.speechSynthesis.getVoices();
+      const engVoice = voices.find(v => v.lang === 'en-US') || voices.find(v => v.lang.startsWith('en'));
+      if (engVoice) utterance.voice = engVoice;
+      utterance.lang = 'en-US';
+      utterance.rate = 1.15;
+      utterance.pitch = 1.05;
+
+      utterance.onstart = () => showToast('Playing English audio summary...');
+      utterance.onend = () => showToast('Finished playback.');
+
+      appState.speechUtterance = utterance;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function pauseAudioSummary() {
+      if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.pause();
+        showToast('Audio paused.');
+      }
+    }
+
+    function stopAudioSummary() {
+      window.speechSynthesis.cancel();
+      showToast('Audio stopped.');
+    }
+
+    function triggerPrintModal() { window.print(); }
+
+    function initExamJumpGrid() {
+      const container = document.getElementById('question-jump-grid');
+      container.innerHTML = '';
+      for (let i = 0; i < 50; i++) {
+        const btn = document.createElement('button');
+        btn.id = `q-jump-${i}`;
+        btn.textContent = i + 1;
+        btn.className = 'w-full py-1 text-[10px] font-bold rounded-lg border transition ' + 
+          (i === 0 ? 'bg-brand-orange text-white border-brand-orange' : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200');
+        btn.onclick = () => jumpToQuestion(i);
+        container.appendChild(btn);
+      }
+    }
+
+    function jumpToQuestion(index) {
+      if (index < 0 || index >= 50) return;
+      appState.currentExamIndex = index;
+      renderExamQuestion(index);
+    }
+
+    function navigateQuestion(dir) {
+      const next = appState.currentExamIndex + dir;
+      if (next >= 0 && next < 50) jumpToQuestion(next);
+    }
+
+    function renderExamQuestion(index) {
+      const q = questionBank[index];
+      appState.currentExamIndex = index;
+
+      document.getElementById('question-tier-badge').textContent = q.tier;
+      document.getElementById('question-tier-badge').className = `px-3 py-1 rounded-full text-xs font-black border ${q.tierClass}`;
+      document.getElementById('question-number-display').textContent = `Question ${index + 1} of 50`;
+      document.getElementById('question-prompt').textContent = q.prompt;
+
+      const box = document.getElementById('options-container');
+      box.innerHTML = '';
+      const letters = ['A', 'B', 'C', 'D'];
+
+      q.options.forEach((opt, optIdx) => {
+        const isSelected = appState.userAnswers[index] === optIdx;
+        const btn = document.createElement('button');
+        btn.className = `w-full text-left p-3.5 rounded-2xl border text-xs sm:text-sm font-bold flex items-center gap-3 transition ${
+          isSelected 
+            ? 'bg-brand-orange-light border-brand-orange text-brand-navy shadow-sm ring-2 ring-brand-orange/30' 
+            : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700'
+        }`;
+        btn.onclick = () => selectExamOption(index, optIdx);
+
+        btn.innerHTML = `
+          <span class="w-7 h-7 rounded-xl flex items-center justify-center font-black text-xs flex-shrink-0 ${
+            isSelected ? 'bg-brand-orange text-white' : 'bg-slate-100 text-slate-600'
+          }">${letters[optIdx]}</span>
+          <span class="flex-1 leading-relaxed">${opt}</span>
+          ${isSelected ? '<i class="fa-solid fa-circle-check text-brand-orange text-base"></i>' : '<i class="fa-regular fa-circle text-slate-300 text-base"></i>'}
+        `;
+        box.appendChild(btn);
+      });
+
+      document.getElementById('in-question-hint-box').classList.add('hidden');
+      document.getElementById('hint-content-text').textContent = q.hint;
+
+      document.getElementById('btn-prev-q').disabled = (index === 0);
+      document.getElementById('btn-prev-q').classList.toggle('opacity-50', index === 0);
+
+      if (index === 49) {
+        document.getElementById('btn-next-q').classList.add('hidden');
+        document.getElementById('btn-submit-exam').classList.remove('hidden');
+      } else {
+        document.getElementById('btn-next-q').classList.remove('hidden');
+        document.getElementById('btn-submit-exam').classList.add('hidden');
+      }
+
+      updateJumpGridStyles();
+    }
+
+    function selectExamOption(qIdx, optIdx) {
+      if (appState.examSubmitted) return;
+      appState.userAnswers[qIdx] = optIdx;
+
+      const answered = appState.userAnswers.filter(a => a !== null).length;
+      document.getElementById('answered-count').textContent = answered;
+      document.getElementById('exam-progress-fill').style.width = `${(answered / 50) * 100}%`;
+
+      renderExamQuestion(qIdx);
+    }
+
+    function updateJumpGridStyles() {
+      for (let i = 0; i < 50; i++) {
+        const btn = document.getElementById(`q-jump-${i}`);
+        if (!btn) continue;
+        const isCurrent = (i === appState.currentExamIndex);
+        const isAnswered = (appState.userAnswers[i] !== null);
+
+        if (isCurrent) {
+          btn.className = 'w-full py-1 text-[10px] font-bold rounded-lg border bg-brand-orange text-white border-brand-orange ring-2 ring-orange-300';
+        } else if (isAnswered) {
+          btn.className = 'w-full py-1 text-[10px] font-bold rounded-lg border bg-emerald-500 text-white border-emerald-600';
+        } else {
+          btn.className = 'w-full py-1 text-[10px] font-bold rounded-lg border bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200';
+        }
+      }
+    }
+
+    function toggleExamHint() {
+      document.getElementById('in-question-hint-box').classList.toggle('hidden');
+    }
+
+    function submitExamForGrading() {
+      const answered = appState.userAnswers.filter(a => a !== null).length;
+      if (answered < 50) {
+        showToast(`Notice: You answered ${answered} of 50 questions.`);
+      }
+
+      appState.examSubmitted = true;
+      let score = 0;
+      questionBank.forEach((q, idx) => {
+        if (appState.userAnswers[idx] === q.correct) score++;
+      });
+
+      const percentage = Math.round((score / 50) * 100);
+
+      document.getElementById('exam-engine-view').classList.add('hidden');
+      const resultsView = document.getElementById('exam-results-view');
+      resultsView.classList.remove('hidden');
+
+      document.getElementById('student-score-name').textContent = `Assessment Report for: ${appState.studentName}`;
+      document.getElementById('raw-score-display').textContent = score;
+      document.getElementById('percent-score-display').textContent = `${percentage}%`;
+
+      const scoreBanner = document.getElementById('score-banner');
+      const iconContainer = document.getElementById('score-icon-container');
+      const tierMsg = document.getElementById('score-tier-message');
+
+      if (percentage >= 95) {
+        scoreBanner.className = 'bg-emerald-50/70 rounded-3xl p-6 sm:p-8 shadow-elevated border-2 border-emerald-500 text-center';
+        iconContainer.className = 'w-20 h-20 rounded-3xl mx-auto flex items-center justify-center text-4xl mb-4 bg-emerald-100 text-emerald-600';
+        iconContainer.innerHTML = '<i class="fa-solid fa-trophy text-amber-500"></i>';
+        tierMsg.innerHTML = `<span class="text-emerald-800 font-extrabold text-base block mb-1">Outstanding! Exceptional performance and mastery 🌟</span>
+        You have demonstrated an extraordinary understanding of network security design and architecture. Keep up this magnificent standard of excellence!`;
+      } else if (percentage >= 90) {
+        scoreBanner.className = 'bg-blue-50/70 rounded-3xl p-6 sm:p-8 shadow-elevated border-2 border-blue-500 text-center';
+        iconContainer.className = 'w-20 h-20 rounded-3xl mx-auto flex items-center justify-center text-4xl mb-4 bg-blue-100 text-blue-600';
+        iconContainer.innerHTML = '<i class="fa-solid fa-rocket text-blue-600"></i>';
+        tierMsg.innerHTML = `<span class="text-blue-800 font-extrabold text-base block mb-1">Excellent! Great performance with minor areas to refine 🚀</span>
+        You are performing at a high level. With a little more focus on precise technical details, you can easily reach the top score. Keep working hard!`;
+      } else if (percentage >= 85) {
+        scoreBanner.className = 'bg-indigo-50/70 rounded-3xl p-6 sm:p-8 shadow-elevated border-2 border-indigo-400 text-center';
+        iconContainer.className = 'w-20 h-20 rounded-3xl mx-auto flex items-center justify-center text-4xl mb-4 bg-indigo-100 text-indigo-600';
+        iconContainer.innerHTML = '<i class="fa-solid fa-star text-indigo-600"></i>';
+        tierMsg.innerHTML = `<span class="text-indigo-900 font-extrabold text-base block mb-1">Very Good! Good foundation with room for targeted study 📚</span>
+        You are on the right track and have a solid grasp of the core concepts, but reviewing specific sub-topics will help strengthen your overall proficiency.`;
+      } else {
+        scoreBanner.className = 'bg-amber-50/70 rounded-3xl p-6 sm:p-8 shadow-elevated border-2 border-amber-500 text-center';
+        iconContainer.className = 'w-20 h-20 rounded-3xl mx-auto flex items-center justify-center text-4xl mb-4 bg-amber-100 text-amber-600';
+        iconContainer.innerHTML = '<i class="fa-solid fa-book-open-reader text-amber-600"></i>';
+        tierMsg.innerHTML = `<span class="text-amber-900 font-extrabold text-base block mb-1">Needs Improvement: Time to review and study deeper 🎯</span>
+        Don't worry, mistakes are part of the learning journey! We strongly encourage you to return to the explanation and revision tabs to deepen your understanding before retaking the assessment.`;
+      }
+
+      renderDetailedAudit();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderDetailedAudit() {
+      const auditList = document.getElementById('audit-questions-list');
+      auditList.innerHTML = '';
+      const letters = ['A', 'B', 'C', 'D'];
+
+      questionBank.forEach((q, idx) => {
+        const userChoice = appState.userAnswers[idx];
+        const isCorrect = (userChoice === q.correct);
+
+        const card = document.createElement('div');
+        card.className = `p-4 sm:p-5 rounded-2xl border text-xs sm:text-sm leading-relaxed ${
+          isCorrect ? 'bg-white border-slate-200' : 'bg-red-50/40 border-red-200'
+        }`;
+
+        card.innerHTML = `
+          <div class="flex items-start justify-between gap-2 mb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-lg flex items-center justify-center font-black text-xs ${
+                isCorrect ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'
+              }">
+                ${isCorrect ? '✓' : '✗'}
+              </span>
+              <span class="font-black text-brand-navy">Question ${idx + 1}: ${q.tier}</span>
+            </div>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${
+              isCorrect ? 'bg-emerald-50 text-emerald-700' : 'bg-red-100 text-red-700'
+            }">
+              ${isCorrect ? 'Correct' : 'Needs Review'}
+            </span>
+          </div>
+
+          <p class="font-bold text-slate-800 mb-3">${q.prompt}</p>
+
+          <div class="space-y-1 mb-3">
+            <div class="p-2 rounded-xl border text-xs font-semibold ${
+              userChoice !== null && isCorrect ? 'bg-emerald-50 text-emerald-900 border-emerald-300' : 'bg-slate-50 text-slate-600 border-slate-200'
+            }">
+              <strong>Your Recorded Answer:</strong> ${userChoice !== null ? `${letters[userChoice]}. ${q.options[userChoice]}` : '<span class="text-red-500">Unanswered</span>'}
+            </div>
+            ${!isCorrect ? `
+              <div class="p-2 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-900 text-xs font-bold">
+                <strong>Curriculum Correct Answer:</strong> ${letters[q.correct]}. ${q.options[q.correct]}
+              </div>
+            ` : ''}
+          </div>
+
+          <div class="bg-blue-50/70 p-3 rounded-xl border border-blue-200 text-slate-700 text-xs leading-relaxed">
+            <strong class="text-blue-900 block mb-0.5"><i class="fa-solid fa-graduation-cap text-brand-orange mr-1"></i> Scientific Explanation & Curriculum Rationale:</strong>
+            ${q.rationale}
+          </div>
+        `;
+
+        auditList.appendChild(card);
+      });
+    }
+
+    function retakeExam() {
+      appState.userAnswers = new Array(50).fill(null);
+      appState.currentExamIndex = 0;
+      appState.examSubmitted = false;
+
+      document.getElementById('answered-count').textContent = '0';
+      document.getElementById('exam-progress-fill').style.width = '0%';
+      document.getElementById('exam-results-view').classList.add('hidden');
+      document.getElementById('exam-engine-view').classList.remove('hidden');
+
+      initExamJumpGrid();
+      renderExamQuestion(0);
+      showToast('Assessment reset. Good luck on your new attempt!');
+    }
+  </script>
+</body>
+</html>
